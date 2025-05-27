@@ -28,37 +28,14 @@ disp(['阵元间距与波长的比值: ' num2str(d_ratio)]);
 N_az = round(arrayLength(1)/d); % 方位向阵元数
 N_el = round(arrayLength(2)/d); % 俯仰向阵元数
 
-
-% 方向角范围
-theta = -90:0.5:90; % 方位角
-phi = -90:0.5:90;   % 俯仰角
-% 坐标网格
-[thetaGrid, phiGrid] = meshgrid(deg2rad(theta), deg2rad(phi));
-
-% 常量
-kd = 2*pi*d/lambda;
-
-% 解析方向图
-AF_az = sin(N_az * kd * sin(thetaGrid) .* cos(phiGrid)/2) ./ ...
-        (N_az * sin(kd * sin(thetaGrid) .* cos(phiGrid)/2));
-AF_el = sin(N_el * kd * sin(phiGrid)/2) ./ ...
-        (N_el * sin(kd * sin(phiGrid)/2));
-
-AF_total = AF_az .* AF_el;
-
-% 归一化
-AF_mag = abs(AF_total);
-AF_dB = 20*log10(AF_mag / max(AF_mag(:)));
+G=arrayGain(theta, phi, N_az, N_el, lambda, d, G_max);
 f1=figure(1);
-surf(theta, phi, AF_dB, 'EdgeColor', 'none');
+imagesc(rad2deg(theta), rad2deg(phi), 10*log10(G));
 xlabel('Azimuth Angle (deg)');
 ylabel('Elevation Angle (deg)');
-zlabel('Gain (dB)');
-title('2D Antenna Pattern');
-axis tight;
-view(2); % 俯视图（2D 热力图）
+title('2D Gain Pattern (dB)');
 colorbar;
-
+axis xy;
 
 % 雷达系统参数
 p_t = 40e3; % 发射功率（W）
@@ -152,3 +129,31 @@ ylabel('最大探测距离 (km)');
 % zlabel('Gain (dB)');
 % title('2D Radiation Pattern');
 % colorbar;
+
+
+function G = arrayGain(theta, phi, N_az, N_el, lambda, d, G_max)
+        % theta, phi: 角度 (rad)
+        % N_az, N_el: 方位与俯仰方向阵元数
+        % lambda: 波长
+        % d: 阵元间距
+        % G_max: 最大增益（线性值）
+
+        k = 2*pi/lambda;
+
+        % 相位项
+        psi_az = k * d * sin(theta) .* cos(phi);
+        psi_el = k * d * sin(phi);
+
+        % 防止除零
+        psi_az(psi_az==0) = 1e-12;
+        psi_el(psi_el==0) = 1e-12;
+
+        % 归一化阵列因子
+        AF_az = sin(N_az * psi_az / 2) ./ (N_az * sin(psi_az / 2));
+        AF_el = sin(N_el * psi_el / 2) ./ (N_el * sin(psi_el / 2));
+
+        AF = AF_az .* AF_el;
+
+        % 增益函数
+        G = G_max * abs(AF).^2;
+end
