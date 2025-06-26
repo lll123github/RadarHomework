@@ -109,7 +109,7 @@ for theta_0=[0 pi/12 pi/6 pi/4 pi/3]
     G_a_theta1=E_a_theta1.^2./(N^2);
     G_a_theta_db1=10*log10(G_a_theta1);
     figure(f3);
-    subplot(4,1,subplot_index);
+    subplot(5,1,subplot_index);
     plot(x_axis, G_a_theta_db);
     hold on;
     plot(x_axis, G_a_theta_db1);

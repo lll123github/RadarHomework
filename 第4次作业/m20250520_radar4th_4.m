@@ -35,7 +35,7 @@ phi = linspace(-pi/2, pi/2, 200);
 % 计算方向图
 G = arrayGain(thetaGrid, phiGrid, N_az, N_el, lambda, d, G_max);
 
-% 显示二维热力图
+% 显示二维幅度图
 f1=figure(1);
 imagesc(rad2deg(theta), rad2deg(phi), 10*log10(G));
 xlabel('Azimuth Angle (deg)');
@@ -105,7 +105,7 @@ ylabel('最大探测距离 (km)');
 % % 显示结果
 % disp(['最大探测距离: ' num2str(R_max/1e3) ' km']);
 
-% 对不同的PRF绘制不同的最大探测距离热力图
+% 对不同的PRF绘制不同的最大探测距离图
 
 fig_index=3; % 图形索引
 for i=1:length(PRF_list) 
